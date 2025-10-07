@@ -10,23 +10,40 @@ import { Loader } from './components/Loader';
 
 import { getUserTodo } from './service/todo';
 import { Todo } from './types/Todo';
+import { getUsers } from './service/user';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loaderState, setLoaderState] = useState(false);
-  const [selectTodos, setSelectTodos] = useState<number | null>(null);
+  const [selectTodos, setSelectTodos] = useState<number>();
   const [todosVisinle, setTodosVisible] = useState(todos);
 
   useEffect(() => {
-    setLoaderState(true);
+    const fetchData = async () => {
+      try {
+        setLoaderState(true);
 
-    setTimeout(() => {
-      getUserTodo().then(data => {
-        setTodos(data);
-        setTodosVisible(data);
+        const [todosData, usersData] = await Promise.all([
+          getUserTodo(),
+          getUsers(),
+        ]);
+
+        const todosWithUsers = todosData.map(todo => ({
+          ...todo,
+          user: usersData.find(user => user.id === todo.userId) || null,
+        }));
+
+        setTodos(todosWithUsers);
+        setTodosVisible(todosWithUsers);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Помилка при завантаженні даних:', error);
+      } finally {
         setLoaderState(false);
-      });
-    }, 1000);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const filteredTodos = (value?: string, completed?: string) => {
@@ -38,7 +55,7 @@ export const App: React.FC = () => {
       );
     }
 
-    if (completed !== 'all') {
+    if (completed && completed !== 'all') {
       const status = completed === 'active' ? false : true;
 
       newTodos = newTodos.filter(todo => todo.completed === status);
@@ -63,14 +80,18 @@ export const App: React.FC = () => {
               <TodoList
                 todos={todosVisinle}
                 selectTodo={selectTodos}
-                select={todoId => setSelectTodos(todoId)}
+                select={setSelectTodos}
               />
             </div>
           </div>
         </div>
       </div>
       {selectTodos && (
-        <TodoModal select={selectTodos} onClose={() => setSelectTodos(null)} />
+        <TodoModal
+          select={selectTodos}
+          todoList={todosVisinle}
+          onClose={() => setSelectTodos(undefined)}
+        />
       )}
     </>
   );

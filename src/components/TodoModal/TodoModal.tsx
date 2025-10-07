@@ -1,45 +1,40 @@
 import React, { useEffect, useState } from 'react';
 import { Loader } from '../Loader';
 import { Todo } from '../../types/Todo';
-import { getUserTodo } from '../../service/todo';
-import { User } from '../../types/User';
-import { getUsers } from '../../service/user';
 
 type Props = {
   onClose: () => void;
   select: number;
+  todoList: Todo[];
 };
 
-export const TodoModal: React.FC<Props> = React.memo(({ onClose, select }) => {
-  const [loaderState, setLoaderState] = useState(false);
-  const [todoInfo, setTodoInfo] = useState<Todo[] | undefined>(undefined);
-  const [userInfo, setUserInfo] = useState<User>();
+export const TodoModal: React.FC<Props> = React.memo(
+  ({ onClose, select, todoList }) => {
+    const [loaderState, setLoaderState] = useState(false);
+    const [todo, setTodo] = useState<Todo>();
 
-  useEffect(() => {
-    setLoaderState(true);
+    useEffect(() => {
+      setLoaderState(true);
 
-    setTimeout(() => {
-      setLoaderState(false);
-      getUserTodo(select).then(setTodoInfo);
-      getUsers(select).then(setUserInfo);
-    }, 1000);
-  }, [select]);
+      setTimeout(() => {
+        setLoaderState(false);
+        setTodo(todoList.find(todos => todos.id === select));
+      }, 1000);
+    }, [select]);
 
-  return (
-    <div className="modal is-active" data-cy="modal">
-      <div className="modal-background" />
-
-      {loaderState ? (
-        <Loader />
-      ) : (
-        todoInfo?.map(todo => (
-          <div className="modal-card" key={todo.id}>
+    return (
+      <div className="modal is-active" data-cy="modal">
+        <div className="modal-background" />
+        {loaderState ? (
+          <Loader />
+        ) : (
+          <div className="modal-card">
             <header className="modal-card-head">
               <div
                 className="modal-card-title has-text-weight-medium"
                 data-cy="modal-header"
               >
-                Todo # {todo.id}
+                Todo #{todo?.id}
               </div>
 
               {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
@@ -53,11 +48,11 @@ export const TodoModal: React.FC<Props> = React.memo(({ onClose, select }) => {
 
             <div className="modal-card-body">
               <p className="block" data-cy="modal-title">
-                {todo.title}
+                {todo?.title}
               </p>
 
               <p className="block" data-cy="modal-user">
-                {todo.completed ? (
+                {todo?.completed ? (
                   <strong className="has-text-success">Done</strong>
                 ) : (
                   <strong className="has-text-danger">Planned</strong>
@@ -65,14 +60,14 @@ export const TodoModal: React.FC<Props> = React.memo(({ onClose, select }) => {
 
                 {' by '}
 
-                <a href={`"mailto:${userInfo?.email}"`}>{userInfo?.name}</a>
+                <a href={`"mailto:${todo?.user?.email}"`}>{todo?.user?.name}</a>
               </p>
             </div>
           </div>
-        ))
-      )}
-    </div>
-  );
-});
+        )}
+      </div>
+    );
+  },
+);
 
 TodoModal.displayName = 'TodoModal';

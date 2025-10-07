@@ -1,10 +1,11 @@
 import React from 'react';
 import { Todo } from '../../types/Todo';
+import cn from 'classnames';
 
 type Props = {
   todos: Todo[];
   select: (todoId: number) => void;
-  selectTodo: number | null;
+  selectTodo: number | undefined;
 };
 
 export const TodoList: React.FC<Props> = React.memo(
@@ -28,9 +29,9 @@ export const TodoList: React.FC<Props> = React.memo(
           {todos.map(todo => (
             <tr
               data-cy="todo"
-              className={
-                selectTodo === todo.id ? 'has-background-info-light' : ''
-              }
+              className={cn({
+                'has-background-info-light': todo.id === selectTodo,
+              })}
               key={todo.id}
             >
               <td className="is-vcentered">{todo.id}</td>
@@ -43,9 +44,10 @@ export const TodoList: React.FC<Props> = React.memo(
               </td>
               <td className="is-vcentered is-expanded">
                 <p
-                  className={
-                    todo.completed ? 'has-text-success' : 'has-text-danger'
-                  }
+                  className={cn({
+                    'has-text-success': todo.completed,
+                    'has-text-danger': !todo.completed,
+                  })}
                 >
                   {todo.title}
                 </p>
@@ -59,7 +61,10 @@ export const TodoList: React.FC<Props> = React.memo(
                 >
                   <span className="icon">
                     <i
-                      className={`far ${todo.id === selectTodo ? 'fa-eye-slash' : 'fa-eye'}`}
+                      className={cn('far', {
+                        'fa-eye-slash': todo.id === selectTodo,
+                        'fa-eye': todo.id !== selectTodo,
+                      })}
                     />
                   </span>
                 </button>
