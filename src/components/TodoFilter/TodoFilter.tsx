@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from 'react';
 type Props = {
-  filter: (value: string, completed: string) => void;
+  onFilter: (value: string, completed: string) => void;
 };
 
-export const TodoFilter: React.FC<Props> = React.memo(({ filter }) => {
-  const [qveryChange, setQveryChange] = useState('');
+export const TodoFilter: React.FC<Props> = React.memo(({ onFilter }) => {
+  const [qvery, setQvery] = useState('');
   const [inputValue, setInputValue] = useState('');
-  const [completedStatus, setCompletedStatus] = useState('');
+  const [completedStatus, setCompletedStatus] = useState('all');
 
   useEffect(() => {
-    filter(qveryChange, completedStatus);
-  }, [qveryChange, completedStatus]);
+    onFilter(qvery, completedStatus);
+  }, [qvery, completedStatus, onFilter]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.target.value;
 
     setInputValue(newValue);
-    setQveryChange(newValue.trim());
+    setQvery(newValue.trim());
   };
 
   const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -25,9 +25,9 @@ export const TodoFilter: React.FC<Props> = React.memo(({ filter }) => {
     setCompletedStatus(newValue);
   };
 
-  const reset = () => {
+  const handleFilterChange = () => {
     setInputValue('');
-    setQveryChange('');
+    setQvery('');
   };
 
   return (
@@ -66,7 +66,7 @@ export const TodoFilter: React.FC<Props> = React.memo(({ filter }) => {
               data-cy="clearSearchButton"
               type="button"
               className="delete"
-              onClick={reset}
+              onClick={handleFilterChange}
             />
           )}
         </span>

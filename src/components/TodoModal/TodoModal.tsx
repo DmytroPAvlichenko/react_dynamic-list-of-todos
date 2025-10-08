@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Loader } from '../Loader';
 import { Todo } from '../../types/Todo';
-import { getUsers } from '../../service/user';
+import { getUser } from '../../service/user';
 import { User } from '../../types/User';
-import { getUserTodo } from '../../service/todo';
+// import { getUserTodo } from '../../service/todo';
 
 type Props = {
   onClose: () => void;
@@ -13,15 +13,14 @@ type Props = {
 export const TodoModal: React.FC<Props> = React.memo(({ onClose, select }) => {
   const [loaderState, setLoaderState] = useState(false);
   const [user, setUser] = useState<User>();
-  const [todo, setTodo] = useState<Todo[]>();
+  const todo = select;
 
   useEffect(() => {
     setLoaderState(true);
 
     setTimeout(() => {
       setLoaderState(false);
-      getUserTodo(select.id).then(setTodo);
-      getUsers(select.userId).then(setUser);
+      getUser(select.userId).then(setUser);
     }, 1000);
   }, [select]);
 
@@ -32,44 +31,39 @@ export const TodoModal: React.FC<Props> = React.memo(({ onClose, select }) => {
         <Loader />
       ) : (
         <div className="modal-card">
-          {todo?.map(to => (
-            <>
-              <header key={to.id} className="modal-card-head">
-                <div
-                  className="modal-card-title has-text-weight-medium"
-                  data-cy="modal-header"
-                >
-                  Todo #{to.id}
-                </div>
+          <header key={todo.id} className="modal-card-head">
+            <div
+              className="modal-card-title has-text-weight-medium"
+              data-cy="modal-header"
+            >
+              Todo #{todo.id}
+            </div>
 
-                {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                <button
-                  type="button"
-                  className="delete"
-                  data-cy="modal-close"
-                  onClick={() => onClose()}
-                />
-              </header>
+            {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+            <button
+              type="button"
+              className="delete"
+              data-cy="modal-close"
+              onClick={() => onClose()}
+            />
+          </header>
+          <div className="modal-card-body">
+            <p className="block" data-cy="modal-title">
+              {todo.title}
+            </p>
 
-              <div className="modal-card-body">
-                <p className="block" data-cy="modal-title">
-                  {to.title}
-                </p>
+            <p className="block" data-cy="modal-user">
+              {todo.completed ? (
+                <strong className="has-text-success">Done</strong>
+              ) : (
+                <strong className="has-text-danger">Planned</strong>
+              )}
 
-                <p className="block" data-cy="modal-user">
-                  {to.completed ? (
-                    <strong className="has-text-success">Done</strong>
-                  ) : (
-                    <strong className="has-text-danger">Planned</strong>
-                  )}
+              {' by '}
 
-                  {' by '}
-
-                  <a href={`mailto:${user?.email}`}>{user?.name}</a>
-                </p>
-              </div>
-            </>
-          ))}
+              <a href={`mailto:${user?.email}`}>{user?.name}</a>
+            </p>
+          </div>
         </div>
       )}
     </div>

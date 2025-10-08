@@ -1,12 +1,10 @@
 import { Todo } from '../types/Todo';
 import { getData } from '../Utils/UtilsClient';
 
-export function getUserTodo(todoId?: number): Promise<Todo[]> {
+export function getTodos(todoId?: number): Promise<Todo | Todo[]> {
   return getData<Todo[]>(`/todos.json`).then(posts => {
     if (todoId !== undefined) {
-      const posted = [...posts];
-
-      return posted.filter(todo => todo.id === todoId);
+      return posts.find(todo => todo.id === todoId) as Todo;
     }
 
     return posts;

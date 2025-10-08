@@ -8,40 +8,47 @@ import { TodoFilter } from './components/TodoFilter';
 import { TodoModal } from './components/TodoModal';
 import { Loader } from './components/Loader';
 
-import { getUserTodo } from './service/todo';
+import { getTodos } from './service/todo';
 import { Todo } from './types/Todo';
 
+const handleFilter = (
+  todoList: Todo[] | Todo,
+  value?: string,
+  completed?: string,
+) => {
+  const todoLis = Array.isArray(todoList) ? todoList : [todoList];
+  let newTodos = todoLis;
+
+  if (value) {
+    newTodos = newTodos.filter(todo =>
+      todo.title.toLowerCase().includes(value.toLowerCase()),
+    );
+  }
+
+  if (completed && completed !== 'all') {
+    const status = completed === 'active' ? false : true;
+
+    newTodos = newTodos.filter(todo => todo.completed === status);
+  }
+
+  return newTodos;
+};
+
 export const App: React.FC = () => {
-  const [todos, setTodos] = useState<Todo[]>([]);
+  const [todos, setTodos] = useState<Todo | Todo[]>([]);
   const [loaderState, setLoaderState] = useState(true);
   const [selectTodos, setSelectTodos] = useState<Todo>();
-  const [todosVisinle, setTodosVisible] = useState(todos);
+  const [value, setValue] = useState<string>('');
+  const [completed, setCompleted] = useState<string>('');
 
   useEffect(() => {
-    getUserTodo().then(data => {
+    getTodos().then(data => {
       setTodos(data);
-      setTodosVisible(data);
       setLoaderState(false);
     });
   }, []);
 
-  const handleFilter = (value?: string, completed?: string) => {
-    let newTodos = [...todos];
-
-    if (value) {
-      newTodos = newTodos.filter(todo =>
-        todo.title.toLowerCase().includes(value.toLowerCase()),
-      );
-    }
-
-    if (completed && completed !== 'all') {
-      const status = completed === 'active' ? false : true;
-
-      newTodos = newTodos.filter(todo => todo.completed === status);
-    }
-
-    setTodosVisible(newTodos);
-  };
+  const todosVisinle = handleFilter(todos, value, completed);
 
   return (
     <>
@@ -51,15 +58,20 @@ export const App: React.FC = () => {
             <h1 className="title">Todos:</h1>
 
             <div className="block">
-              <TodoFilter filter={handleFilter} />
+              <TodoFilter
+                onFilter={(newValue: string, newCompleted: string) => {
+                  setValue(newValue);
+                  setCompleted(newCompleted);
+                }}
+              />
             </div>
 
             <div className="block">
               {loaderState && <Loader />}
               <TodoList
-                todos={todosVisinle}
-                selectTodo={selectTodos}
-                select={setSelectTodos}
+                todos={todosVisinle as Todo[]}
+                selectedTodo={selectTodos}
+                onSelectTodo={setSelectTodos}
               />
             </div>
           </div>

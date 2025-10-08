@@ -4,12 +4,12 @@ import cn from 'classnames';
 
 type Props = {
   todos: Todo[];
-  select: (todo: Todo) => void;
-  selectTodo: Todo | undefined;
+  onSelectTodo: (todo: Todo) => void;
+  selectedTodo: Todo | undefined;
 };
 
 export const TodoList: React.FC<Props> = React.memo(
-  ({ todos, select, selectTodo }) => {
+  ({ todos, onSelectTodo, selectedTodo }) => {
     return (
       <table className="table is-narrow is-fullwidth">
         <thead>
@@ -30,7 +30,7 @@ export const TodoList: React.FC<Props> = React.memo(
             <tr
               data-cy="todo"
               className={cn({
-                'has-background-info-light': todo.id === selectTodo?.id,
+                'has-background-info-light': todo.id === selectedTodo?.id,
               })}
               key={todo.id}
             >
@@ -57,13 +57,13 @@ export const TodoList: React.FC<Props> = React.memo(
                   data-cy="selectButton"
                   className="button"
                   type="button"
-                  onClick={() => select(todo)}
+                  onClick={() => onSelectTodo(todo)}
                 >
                   <span className="icon">
                     <i
                       className={cn('far', {
-                        'fa-eye-slash': todo.id === selectTodo?.id,
-                        'fa-eye': todo.id !== selectTodo?.id,
+                        'fa-eye-slash': todo.id === selectedTodo?.id,
+                        'fa-eye': todo.id !== selectedTodo?.id,
                       })}
                     />
                   </span>
