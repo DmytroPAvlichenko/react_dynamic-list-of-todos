@@ -13,19 +13,16 @@ import { Todo } from './types/Todo';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [loaderState, setLoaderState] = useState(false);
+  const [loaderState, setLoaderState] = useState(true);
   const [selectTodos, setSelectTodos] = useState<Todo>();
   const [todosVisinle, setTodosVisible] = useState(todos);
 
   useEffect(() => {
-    setLoaderState(true);
-    setTimeout(() => {
-      getUserTodo().then(data => {
-        setTodos(data);
-        setTodosVisible(data);
-        setLoaderState(false);
-      });
-    }, 1000);
+    getUserTodo().then(data => {
+      setTodos(data);
+      setTodosVisible(data);
+      setLoaderState(false);
+    });
   }, []);
 
   const handleFilter = (value?: string, completed?: string) => {
