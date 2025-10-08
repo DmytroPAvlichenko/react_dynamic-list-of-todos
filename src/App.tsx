@@ -10,43 +10,25 @@ import { Loader } from './components/Loader';
 
 import { getUserTodo } from './service/todo';
 import { Todo } from './types/Todo';
-import { getUsers } from './service/user';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loaderState, setLoaderState] = useState(false);
-  const [selectTodos, setSelectTodos] = useState<number>();
+  const [selectTodos, setSelectTodos] = useState<Todo>();
   const [todosVisinle, setTodosVisible] = useState(todos);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoaderState(true);
-
-        const [todosData, usersData] = await Promise.all([
-          getUserTodo(),
-          getUsers(),
-        ]);
-
-        const todosWithUsers = todosData.map(todo => ({
-          ...todo,
-          user: usersData.find(user => user.id === todo.userId) || null,
-        }));
-
-        setTodos(todosWithUsers);
-        setTodosVisible(todosWithUsers);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Помилка при завантаженні даних:', error);
-      } finally {
+    setLoaderState(true);
+    setTimeout(() => {
+      getUserTodo().then(data => {
+        setTodos(data);
+        setTodosVisible(data);
         setLoaderState(false);
-      }
-    };
-
-    fetchData();
+      });
+    }, 1000);
   }, []);
 
-  const filteredTodos = (value?: string, completed?: string) => {
+  const handleFilter = (value?: string, completed?: string) => {
     let newTodos = [...todos];
 
     if (value) {
@@ -72,7 +54,7 @@ export const App: React.FC = () => {
             <h1 className="title">Todos:</h1>
 
             <div className="block">
-              <TodoFilter filter={filteredTodos} />
+              <TodoFilter filter={handleFilter} />
             </div>
 
             <div className="block">
@@ -89,7 +71,6 @@ export const App: React.FC = () => {
       {selectTodos && (
         <TodoModal
           select={selectTodos}
-          todoList={todosVisinle}
           onClose={() => setSelectTodos(undefined)}
         />
       )}

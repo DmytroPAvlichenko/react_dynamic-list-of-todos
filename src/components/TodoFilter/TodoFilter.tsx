@@ -1,19 +1,12 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-import debounce from 'debounce';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 type Props = {
-  filter: (value: string, complited: string) => void;
+  filter: (value: string, completed: string) => void;
 };
 
 export const TodoFilter: React.FC<Props> = React.memo(({ filter }) => {
   const [qveryChange, setQveryChange] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [completedStatus, setCompletedStatus] = useState('');
-
-  const applyQuery = useMemo(
-    () => debounce(setQveryChange, 1000),
-    [setQveryChange],
-  );
 
   useEffect(() => {
     filter(qveryChange, completedStatus);
@@ -23,10 +16,10 @@ export const TodoFilter: React.FC<Props> = React.memo(({ filter }) => {
     const newValue = event.target.value;
 
     setInputValue(newValue);
-    applyQuery(newValue.trim());
+    setQveryChange(newValue.trim());
   };
 
-  const getComplited = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = event.target.value;
 
     setCompletedStatus(newValue);
@@ -34,14 +27,18 @@ export const TodoFilter: React.FC<Props> = React.memo(({ filter }) => {
 
   const reset = () => {
     setInputValue('');
-    applyQuery('');
+    setQveryChange('');
   };
 
   return (
     <form className="field has-addons">
       <p className="control">
         <span className="select">
-          <select data-cy="statusSelect" onChange={getComplited}>
+          <select
+            data-cy="statusSelect"
+            value={completedStatus}
+            onChange={handleStatusChange}
+          >
             <option value="all">All</option>
             <option value="active">Active</option>
             <option value="completed">Completed</option>
